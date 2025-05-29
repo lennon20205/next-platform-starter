@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetMax - Apostas Esportivas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom CSS for elements that need more specific styling */
+        .sport-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+        .odds-value {
+            transition: all 0.2s ease;
+        }
+        .odds-value:hover {
+            background-color: #3b82f6;
+            color: white;
+            transform: scale(1.05);
+        }
+        .live-badge {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { background-color: #ef4444; }
+            50% { background-color: #dc2626; }
+            100% { background-color: #ef4444; }
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: #1f2937;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-white">
+    <!-- Header/Navbar -->
+    <header class="bg-gray-900 shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-blue-400 mr-10">BET<span class="text-white">MAX</span></div>
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="#" class="hover:text-blue-400 font-medium">Esportes</a>
+                        <a href="#" class="hover:text-blue-400 font-medium">Ao Vivo</a>
+                        <a href="#" class="hover:text-blue-400 font-medium">Cassino</a>
+                        <a href="#" class="hover:text-blue-400 font-medium">Promoções</a>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-medium">
+                            <i class="fas fa-user mr-2"></i>Entrar
+                        </button>
+                    </div>
+                    <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md font-medium">
+                        <i class="fas fa-wallet mr-2"></i>Depositar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Quick Access Bar -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+            <div class="flex overflow-x-auto space-x-4">
+                <button class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/36/36464.png" class="sport-icon"> Futebol
+                </button>
+                <button class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/889/889419.png" class="sport-icon"> Basquete
+                </button>
+                <button class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/889/889434.png" class="sport-icon"> Tênis
+                </button>
+                <button class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/889/889428.png" class="sport-icon"> Vôlei
+                </button>
+                <button class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/889/889433.png" class="sport-icon"> Futebol Americano
+                </button>
+                <button class="flex-shrink-0 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/36/36463.png" class="sport-icon"> MMA
+                </button>
+            </div>
+        </div>
+
+        <!-- Bet Slip (Right Side) -->
+        <div class="fixed right-4 top-24 w-80 bg-gray-800 rounded-lg shadow-xl z-10" id="betSlip">
+            <div class="bg-gray-900 px-4 py-3 rounded-t-lg flex justify-between items-center">
+                <h3 class="font-bold">Seu Palpite</h3>
+                <button class="text-gray-400 hover:text-white" onclick="clearBets()">
+                    <i class="fas fa-trash"></i> Limpar
+                </button>
+            </div>
+            <div class="p-4" id="betsContainer">
+                <p class="text-gray-400 text-center py-8">Adicione seleções ao seu palpite</p>
+            </div>
+            <div class="bg-gray-900 px-4 py-3 border-t border-gray-700">
+                <div class="flex justify-between mb-2">
+                    <span>Valor da Aposta:</span>
+                    <input type="number" class="bg-gray-700 text-white w-24 px-2 py-1 rounded" placeholder="R$" min="5" value="10" id="betAmount">
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Ganhos Potenciais:</span>
+                    <span id="potentialWin">R$ 0.00</span>
+                </div>
+                <button class="w-full bg-green-600 hover:bg-green-700 py-2 rounded-md font-bold" id="placeBetBtn">
+                    APOSTAR
+                </button>
+            </div>
+        </div>
+
+        <!-- Featured Matches -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-star mr-2 text-yellow-400"></i> Destaques
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Match Card 1 -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <div class="bg-gray-900 px-4 py-2 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/36/36464.png" class="sport-icon">
+                            <span>Campeonato Brasileiro Série A</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Hoje, 21:00</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-center">
+                                <div class="font-medium">Flamengo</div>
+                                <div class="text-sm text-gray-400">Casa</div>
+                            </div>
+                            <div class="text-2xl font-bold">vs</div>
+                            <div class="text-center">
+                                <div class="font-medium">Palmeiras</div>
+                                <div class="text-sm text-gray-400">Visitante</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Flamengo', 1.85, 'Flamengo vs Palmeiras - Vencedor')">
+                                1.85
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Empate', 3.40, 'Flamengo vs Palmeiras - Empate')">
+                                3.40
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Palmeiras', 4.20, 'Flamengo vs Palmeiras - Vencedor')">
+                                4.20
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Card 2 -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <div class="bg-red-900 px-4 py-2 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/36/36464.png" class="sport-icon">
+                            <span class="flex items-center">
+                                <span class="live-badge w-2 h-2 rounded-full mr-2"></span>
+                                Premier League
+                            </span>
+                        </div>
+                        <span class="text-xs text-gray-400">Ao Vivo 65'</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-center">
+                                <div class="font-medium">Liverpool</div>
+                                <div class="text-sm text-gray-400">2</div>
+                            </div>
+                            <div class="text-2xl font-bold">vs</div>
+                            <div class="text-center">
+                                <div class="font-medium">Man City</div>
+                                <div class="text-sm text-gray-400">1</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Liverpool', 2.10, 'Liverpool vs Man City - Vencedor')">
+                                2.10
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Empate', 3.25, 'Liverpool vs Man City - Empate')">
+                                3.25
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Man City', 2.80, 'Liverpool vs Man City - Vencedor')">
+                                2.80
+                            </button>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Over 2.5', 1.75, 'Liverpool vs Man City - Over 2.5')">
+                                Over 2.5 @1.75
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Under 2.5', 2.05, 'Liverpool vs Man City - Under 2.5')">
+                                Under 2.5 @2.05
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Card 3 -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <div class="bg-gray-900 px-4 py-2 flex justify-between items-center">
+                        <div class="flex items-center">
+                            <img src="https://cdn-icons-png.flaticon.com/512/889/889419.png" class="sport-icon">
+                            <span>NBA</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Amanhã, 02:30</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-center">
+                                <div class="font-medium">Lakers</div>
+                                <div class="text-sm text-gray-400"></div>
+                            </div>
+                            <div class="text-2xl font-bold">vs</div>
+                            <div class="text-center">
+                                <div class="font-medium">Warriors</div>
+                                <div class="text-sm text-gray-400"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Lakers', 1.95, 'Lakers vs Warriors - Vencedor')">
+                                1.95
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Warriors', 1.85, 'Lakers vs Warriors - Vencedor')">
+                                1.85
+                            </button>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Lakers +3.5', 1.90, 'Lakers vs Warriors - Lakers +3.5')">
+                                Lakers +3.5 @1.90
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Warriors -3.5', 1.90, 'Lakers vs Warriors - Warriors -3.5')">
+                                Warriors -3.5 @1.90
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sports Categories -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-futbol mr-2"></i> Futebol
+            </h2>
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                <!-- League Header -->
+                <div class="bg-gray-700 px-4 py-2 flex justify-between items-center cursor-pointer" onclick="toggleLeague('premierLeague')">
+                    <div class="flex items-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/pt/f/f2/Premier_League_Logo.svg" class="h-6 mr-2">
+                        <span>Premier League</span>
+                    </div>
+                    <i class="fas fa-chevron-down" id="premierLeagueArrow"></i>
+                </div>
+                <!-- League Matches (Collapsible) -->
+                <div class="border-t border-gray-700" id="premierLeague">
+                    <!-- Match Row -->
+                    <div class="px-4 py-3 hover:bg-gray-700 border-b border-gray-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex-1 text-right">
+                                <span class="font-medium">Arsenal</span>
+                            </div>
+                            <div class="mx-4 text-center">
+                                <div class="text-xs text-gray-400">Amanhã, 16:00</div>
+                                <div class="text-sm">vs</div>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <span class="font-medium">Chelsea</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="odds-value bg-gray-600 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Arsenal', 1.80, 'Arsenal vs Chelsea - Vencedor')">
+                                1.80
+                            </button>
+                            <button class="odds-value bg-gray-600 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Empate', 3.60, 'Arsenal vs Chelsea - Empate')">
+                                3.60
+                            </button>
+                            <button class="odds-value bg-gray-600 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Chelsea', 4.50, 'Arsenal vs Chelsea - Vencedor')">
+                                4.50
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Another Match Row -->
+                    <div class="px-4 py-3 hover:bg-gray-700 border-b border-gray-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex-1 text-right">
+                                <span class="font-medium">Man United</span>
+                            </div>
+                            <div class="mx-4 text-center">
+                                <div class="text-xs text-gray-400">Sábado, 14:30</div>
+                                <div class="text-sm">vs</div>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <span class="font-medium">Tottenham</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="odds-value bg-gray-600 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Man United', 2.10, 'Man United vs Tottenham - Vencedor')">
+                                2.10
+                            </button>
+                            <button class="odds-value bg-gray-600 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Empate', 3.30, 'Man United vs Tottenham - Empate')">
+                                3.30
+                            </button>
+                            <button class="odds-value bg-gray-600 hover:bg-blue-600 py-1 rounded text-sm" onclick="addToBetSlip('Tottenham', 3.40, 'Man United vs Tottenham - Vencedor')">
+                                3.40
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Events -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-tv mr-2 text-red-500"></i> Ao Vivo Agora
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Live Event 1 -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <div class="bg-red-900 px-4 py-2 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="https://cdn-icons-png.flaticon.com/512/36/36464.png" class="sport-icon">
+                                <span class="flex items-center">
+                                    <span class="live-badge w-2 h-2 rounded-full mr-2"></span>
+                                    La Liga
+                                </span>
+                            </div>
+                            <span class="text-xs text-gray-400">72'</span>
+                        </div>
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-70 px-2 py-1 rounded text-sm">
+                            <i class="fas fa-play mr-1"></i> Assistir
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-center">
+                                <div class="font-medium">Barcelona</div>
+                                <div class="text-sm text-gray-400">1</div>
+                            </div>
+                            <div class="text-2xl font-bold">vs</div>
+                            <div class="text-center">
+                                <div class="font-medium">Real Madrid</div>
+                                <div class="text-sm text-gray-400">1</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Barcelona', 2.50, 'Barcelona vs Real Madrid - Vencedor')">
+                                2.50
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Empate', 3.10, 'Barcelona vs Real Madrid - Empate')">
+                                3.10
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Real Madrid', 2.70, 'Barcelona vs Real Madrid - Vencedor')">
+                                2.70
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Event 2 -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <div class="bg-red-900 px-4 py-2 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <img src="https://cdn-icons-png.flaticon.com/512/889/889434.png" class="sport-icon">
+                                <span class="flex items-center">
+                                    <span class="live-badge w-2 h-2 rounded-full mr-2"></span>
+                                    ATP Masters
+                                </span>
+                            </div>
+                            <span class="text-xs text-gray-400">2º Set</span>
+                        </div>
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-70 px-2 py-1 rounded text-sm">
+                            <i class="fas fa-play mr-1"></i> Assistir
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-center">
+                                <div class="font-medium">Djokovic</div>
+                                <div class="text-sm text-gray-400">6</div>
+                            </div>
+                            <div class="text-2xl font-bold">vs</div>
+                            <div class="text-center">
+                                <div class="font-medium">Alcaraz</div>
+                                <div class="text-sm text-gray-400">3</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Djokovic', 1.60, 'Djokovic vs Alcaraz - Vencedor')">
+                                Djokovic @1.60
+                            </button>
+                            <button class="odds-value bg-gray-700 hover:bg-blue-600 py-2 rounded" onclick="addToBetSlip('Alcaraz', 2.30, 'Djokovic vs Alcaraz - Vencedor')">
+                                Alcaraz @2.30
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">BetMax</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Sobre Nós</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Termos e Condições</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Política de Privacidade</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Jogo Responsável</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Esportes</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Futebol</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Basquete</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Tênis</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">eSports</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Ajuda</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Depósitos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Saques</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contato</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Pagamentos</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <img src="https://logodownload.org/wp-content/uploads/2014/10/visa-logo-1.png" class="h-8">
+                        <img src="https://logodownload.org/wp-content/uploads/2014/10/mastercard-logo-3-1.png" class="h-8">
+                        <img src="https://logodownload.org/wp-content/uploads/2020/04/pix-logo.png" class="h-8">
+                        <img src="https://logodownload.org/wp-content/uploads/2019/08/paypal-logo-1.png" class="h-8">
+                        <img src="https://logodownload.org/wp-content/uploads/2019/08/bitcoin-logo-1.png" class="h-8">
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="font-medium mb-2">Baixe nosso app</h4>
+                        <div class="flex space-x-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/2560px-Download_on_the_App_Store_Badge.svg.png" class="h-10">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/2560px-Google_Play_Store_badge_EN.svg.png" class="h-10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500 text-sm">
+                <p>© 2023 BetMax. Todos os direitos reservados.</p>
+                <p class="mt-2">Apostas esportivas envolvem risco. Jogue com responsabilidade.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Toggle league visibility
+        function toggleLeague(leagueId) {
+            const league = document.getElementById(leagueId);
+            const arrow = document.getElementById(leagueId + 'Arrow');
+            
+            if (league.style.display === 'none') {
+                league.style.display = 'block';
+                arrow.classList.remove('fa-chevron-down');
+                arrow.classList.add('fa-chevron-up');
+            } else {
+                league.style.display = 'none';
+                arrow.classList.remove('fa-chevron-up');
+                arrow.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Initialize leagues as collapsed
+        document.addEventListener('DOMContentLoaded', function() {
+            const leagues = ['premierLeague'];
+            leagues.forEach(league => {
+                document.getElementById(league).style.display = 'none';
+            });
+        });
+
+        // Bet slip functionality
+        let bets = [];
+
+        function addToBetSlip(selection, odds, event) {
+            const bet = {
+                selection: selection,
+                odds: odds,
+                event: event
+            };
+            
+            bets.push(bet);
+            updateBetSlip();
+        }
+
+        function removeBet(index) {
+            bets.splice(index, 1);
+            updateBetSlip();
+        }
+
+        function clearBets() {
+            bets = [];
+            updateBetSlip();
+        }
+
+        function updateBetSlip() {
+            const betsContainer = document.getElementById('betsContainer');
+            
+            if (bets.length === 0) {
+                betsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Adicione seleções ao seu palpite</p>';
+                document.getElementById('potentialWin').textContent = 'R$ 0.00';
+                return;
+            }
+            
+            let html = '';
+            let totalOdds = 1;
+            
+            bets.forEach((bet, index) => {
+                totalOdds *= bet.odds;
+                html += `
+                    <div class="border-b border-gray-700 pb-3 mb-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">${bet.selection} @${bet.odds.toFixed(2)}</div>
+                                <div class="text-sm text-gray-400">${bet.event}</div>
+                            </div>
+                            <button class="text-red-500 hover:text-red-400" onclick="removeBet(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            betsContainer.innerHTML = html;
+            updatePotentialWin();
+        }
+
+        function updatePotentialWin() {
+            const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
+            let totalOdds = 1;
+            
+            bets.forEach(bet => {
+                totalOdds *= bet.odds;
+            });
+            
+            const potentialWin = betAmount * totalOdds;
+            document.getElementById('potentialWin').textContent = `R$ ${potentialWin.toFixed(2)}`;
+        }
+
+        // Place bet button
+        document.getElementById('placeBetBtn').addEventListener('click', function() {
+            if (bets.length === 0) {
+                alert('Adicione seleções ao seu palpite antes de apostar!');
+                return;
+            }
+            
+            const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
+            
+            if (betAmount < 5) {
+                alert('O valor mínimo da aposta é R$ 5,00');
+                return;
+            }
+            
+            let totalOdds = 1;
+            let betDetails = '';
+            
+            bets.forEach(bet => {
+                totalOdds *= bet.odds;
+                betDetails += `${bet.event}: ${bet.selection} @${bet.odds.toFixed(2)}\n`;
+            });
+            
+            const potentialWin = betAmount * totalOdds;
+            
+            alert(`Aposta realizada com sucesso!\n\nValor: R$ ${betAmount.toFixed(2)}\n\nDetalhes:\n${betDetails}\nGanhos Potenciais: R$ ${potentialWin.toFixed(2)}`);
+            
+            // Clear bet slip after placing bet
+            clearBets();
+        });
+
+        // Update potential win when bet amount changes
+        document.getElementById('betAmount').addEventListener('input', updatePotentialWin);
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=LENNON20/betmax" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
